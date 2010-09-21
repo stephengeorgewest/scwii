@@ -47,11 +47,11 @@ Node::addNeighbor(Direction dir, Node * n)
 	
 	// check clockwise 3
 	//if(n->ID==9)
-	{
-		char buf[64];
-		sprintf(buf, "\nThis %i, add %i, dir %i", this->ID,n->ID,dir);
-		netCon.send_message(buf);
-	}
+	//{
+	//	char buf[64];
+	//	sprintf(buf, "\nThis %i, add %i, dir %i", this->ID,n->ID,dir);
+	//	netCon.sendMessage(buf);
+	//}
 	Node * neig = this->neighbor[dir+1];
 	if(neig)//may be null
 	{

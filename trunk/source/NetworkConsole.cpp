@@ -83,7 +83,7 @@ int NetworkConsole::setup_non_blocking()
 }
 */
 int
-NetworkConsole::send_message(const char * message)
+NetworkConsole::sendMessage(const char * message)
 {
 	int num_sent = net_send(Data->netSocket,message,strlen(message),0);
 	if (num_sent < 0)
