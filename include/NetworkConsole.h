@@ -13,7 +13,7 @@ class NetworkConsole
 		NetworkConsole();
 		void Init();
 		~NetworkConsole();
-		int send_message(const char * message);
+		int sendMessage(const char * message);
 };
 
 #endif

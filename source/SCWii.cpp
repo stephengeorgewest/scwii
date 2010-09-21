@@ -33,13 +33,13 @@ int main(void)
 	printf("Hello World!\n");
 	printf("initializing network console\n");
 	netCon.Init();
-	netCon.send_message("Hello from Wii\n");
+	netCon.sendMessage("Hello from Wii\n");
 	printf("Home to exit");
 	
-	dir_test();
+	//dir_test();
 	
 	Map gameboard(2,2);
-	netCon.send_message("map initialized\n");
+	netCon.sendMessage("map initialized\n");
 	bool done = false;
 	Node * current_selected;
 	current_selected=gameboard.prime;
@@ -58,11 +58,11 @@ int main(void)
 			Node * next = current_selected->neighbor[EAST];
 			if(next != 0 )
 			{
-				netCon.send_message("\n\nMoving East");
+				netCon.sendMessage("\n\nMoving East");
 				current_selected = next;
 			}
 			else
-				netCon.send_message("\n\n East NULL Node");
+				netCon.sendMessage("\n\n East NULL Node");
 			
 		}
 		if(
@@ -75,10 +75,10 @@ int main(void)
 			if(next != 0 )
 			{
 				current_selected = next;
-				netCon.send_message("\n\nMoving West");
+				netCon.sendMessage("\n\nMoving West");
 			}
 			else
-				netCon.send_message("\n\n West NULL Node");
+				netCon.sendMessage("\n\n West NULL Node");
 		}
 		
 		
@@ -93,10 +93,10 @@ int main(void)
 			if(next != 0 )
 			{
 				current_selected = next;
-				netCon.send_message("\n\nMoving NOrth West");
+				netCon.sendMessage("\n\nMoving NOrth West");
 			}
 			else
-				netCon.send_message("\n\n NOrth West NULL Node");
+				netCon.sendMessage("\n\n NOrth West NULL Node");
 		}
 		if(
 			(pressed & WPAD_BUTTON_RIGHT) &&
@@ -108,10 +108,10 @@ int main(void)
 			if(next != 0 )
 			{
 				current_selected = next;
-				netCon.send_message("\n\nMoving NOrth East");
+				netCon.sendMessage("\n\nMoving NOrth East");
 			}
 			else
-				netCon.send_message("\n\n NOrth east NULL Node");
+				netCon.sendMessage("\n\n NOrth east NULL Node");
 		}
 		
 		
@@ -125,10 +125,10 @@ int main(void)
 			if(next != 0 )
 			{
 				current_selected = next;
-				netCon.send_message("\n\nMoving SOUTH West");
+				netCon.sendMessage("\n\nMoving SOUTH West");
 			}
 			else
-				netCon.send_message("\n\n SOUTH West NULL Node");
+				netCon.sendMessage("\n\n SOUTH West NULL Node");
 		}
 		if(
 			(pressed & WPAD_BUTTON_RIGHT) &&
@@ -140,10 +140,10 @@ int main(void)
 			if(next != 0 )
 			{
 				current_selected = next;
-				netCon.send_message("\n\nMoving SOUTH EAST");
+				netCon.sendMessage("\n\nMoving SOUTH EAST");
 			}
 			else
-				netCon.send_message("\n\n SOUTH East NULL Node");
+				netCon.sendMessage("\n\n SOUTH East NULL Node");
 		}
 		
 		
@@ -154,30 +154,30 @@ int main(void)
 			//string str = new string(current_selected);
 			char buf[64];
 			sprintf(buf, "\nCurrent Node - %i", current_selected->ID);
-			netCon.send_message(buf);
+			netCon.sendMessage(buf);
 			if(current_selected->isGround)
-				netCon.send_message(" -ground");
+				netCon.sendMessage(" -ground");
 			else
-				netCon.send_message(" -water");
+				netCon.sendMessage(" -water");
 			if(current_selected->city)
-				netCon.send_message(" -city");
+				netCon.sendMessage(" -city");
 			if(current_selected ==gameboard.prime)
-				netCon.send_message(" -prime");
+				netCon.sendMessage(" -prime");
 			if(current_selected ==gameboard.east_pole)
-				netCon.send_message(" -east_pole");
+				netCon.sendMessage(" -east_pole");
 			if(current_selected ==gameboard.anti_prime)
-				netCon.send_message(" -anti_prime");
+				netCon.sendMessage(" -anti_prime");
 			if(current_selected ==gameboard.west_pole)
-				netCon.send_message(" -west_pole");
+				netCon.sendMessage(" -west_pole");
 			if(current_selected ==gameboard.north_pole)
-				netCon.send_message(" -north_pole");
+				netCon.sendMessage(" -north_pole");
 			if(current_selected ==gameboard.south_pole)
-				netCon.send_message(" -south_pole");
+				netCon.sendMessage(" -south_pole");
 		}
 		
 		VIDEO_WaitVSync();
 	}
-	netCon.send_message("closing");
+	netCon.sendMessage("closing");
 	
 	if (consoleframeBuffer != 0)
 	{
@@ -185,14 +185,14 @@ int main(void)
 		consoleframeBuffer  = 0;
 	}
 	//close java client
-	//netCon.send_message("exit");
+	//netCon.sendMessage("exit");
 	//exit(0);
 	return(0);
 }
 void dir_test()
 {
 	Direction e=EAST,se=SOUTH_EAST,sw=SOUTH_WEST,w=WEST,nw=NORTH_WEST,ne=NORTH_EAST;
-	netCon.send_message("Direction Test");
+	netCon.sendMessage("Direction Test");
 	char buffer[256];
 	sprintf(buffer,"\
 		EAST %i,\
@@ -208,7 +208,7 @@ void dir_test()
 		w,
 		nw,
 		ne);
-	netCon.send_message(buffer);
+	netCon.sendMessage(buffer);
 	
 	sprintf(buffer,"\
 		EAST+1 %i,\
@@ -224,7 +224,7 @@ void dir_test()
 		w+1,
 		nw+1,
 		ne+1);
-	netCon.send_message(buffer);
+	netCon.sendMessage(buffer);
 	
 	sprintf(buffer,"\
 		EAST %i,\
@@ -240,7 +240,7 @@ void dir_test()
 		w,
 		nw,
 		ne);
-	netCon.send_message(buffer);
+	netCon.sendMessage(buffer);
 	
 	sprintf(buffer,"\
 		EAST-1 %i,\
@@ -256,7 +256,7 @@ void dir_test()
 		w-1,
 		nw-1,
 		ne-1);
-	netCon.send_message(buffer);
+	netCon.sendMessage(buffer);
 	
 	sprintf(buffer,"\
 		EAST-1 %i,\
@@ -272,7 +272,7 @@ void dir_test()
 		w-1,
 		nw-1,
 		ne-1);
-	netCon.send_message(buffer);
+	netCon.sendMessage(buffer);
 	
 	sprintf(buffer,"\
 		~EAST %i,\
@@ -288,5 +288,5 @@ void dir_test()
 		~w,
 		~nw,
 		~ne);
-	netCon.send_message(buffer);
+	netCon.sendMessage(buffer);
 }
