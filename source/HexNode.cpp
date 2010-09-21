@@ -1,4 +1,4 @@
-#include "Node.h"
+#include "HexNode.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -8,7 +8,7 @@ extern NetworkConsole netCon;
 
 int nodeNum;//for Debug
 
-Node::Node()
+HexNode::HexNode()
 {
 	city=0;
 	//PieceList pieces;
@@ -20,8 +20,9 @@ Node::Node()
 	neighbor[WEST]=0;
 	isGround=false;
 	ID=nodeNum++;
+	location=UNSPECIFIED;
 }
-Node::Node(int id)
+HexNode::HexNode(GeographicLocation loc)
 {
 	city=0;
 	//PieceList pieces;
@@ -32,16 +33,36 @@ Node::Node(int id)
 	neighbor[SOUTH_WEST]=0;
 	neighbor[WEST]=0;
 	isGround=false;
+	location=loc;
+	ID=nodeNum++;
+	
+}
+HexNode::HexNode(int id)
+{
+	city=0;
+	//PieceList pieces;
+	neighbor[NORTH_WEST]=0;
+	neighbor[NORTH_EAST]=0;
+	neighbor[EAST]=0;
+	neighbor[SOUTH_EAST]=0;
+	neighbor[SOUTH_WEST]=0;
+	neighbor[WEST]=0;
+	isGround=false;
+	location=UNSPECIFIED;
 	ID=id;
 }
-Node *
-Node::addNeighbor(Direction dir)
+HexNode::~HexNode()
+{
+	
+}
+HexNode *
+HexNode::addNeighbor(HexDirection dir)
 {	
-	Node * n = new Node;
+	HexNode * n = new HexNode;
 	return this->addNeighbor(dir,n);
 }
-Node *
-Node::addNeighbor(Direction dir, Node * n)
+HexNode *
+HexNode::addNeighbor(HexDirection dir, HexNode * n)
 {
 	this->connectNodes(dir,n);
 	
@@ -52,7 +73,7 @@ Node::addNeighbor(Direction dir, Node * n)
 	//	sprintf(buf, "\nThis %i, add %i, dir %i", this->ID,n->ID,dir);
 	//	netCon.sendMessage(buf);
 	//}
-	Node * neig = this->neighbor[dir+1];
+	HexNode * neig = this->neighbor[dir+1];
 	if(neig)//may be null
 	{
 		n->connectNodes((~dir)-1,neig);
@@ -94,7 +115,7 @@ Node::addNeighbor(Direction dir, Node * n)
 }
 
 void
-Node::connectNodes(Direction dir, Node* n2)
+HexNode::connectNodes(HexDirection dir, HexNode* n2)
 {	
 	this->neighbor[dir]=n2;
 	n2->neighbor[~dir]=this;
@@ -103,11 +124,11 @@ Node::connectNodes(Direction dir, Node* n2)
 
 //must be previously connected nodes
 	/*void
-Node::connectNodesPortal(Node* n1, Direction dir1, Node* n2, Direction dir2)
+HexNode::connectNodesPortal(HexNode* n1, HexDirection dir1, HexNode* n2, HexDirection dir2)
 {
 	//make later
 
-	Direction dir2;
+	HexDirection dir2;
 	if(dir2_==NONE)
 		dir2=~dir1;
 	else

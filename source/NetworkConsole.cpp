@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <gccore.h>
 #include <network.h>
+#include <unistd.h>
 
 #define MULTICAST_GROUP "224.1.1.1"
 #define MULTICAST_PORT 4000
@@ -86,6 +87,7 @@ int
 NetworkConsole::sendMessage(const char * message)
 {
 	int num_sent = net_send(Data->netSocket,message,strlen(message),0);
+	//usleep(5000);
 	if (num_sent < 0)
 	{
 		puts("sendto error");

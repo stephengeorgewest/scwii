@@ -1,14 +1,14 @@
 #ifndef City_h
 #define City_h
 
-class Node;
+class HexNode;
 class Piece;
 //class Team;
 
 
 class City{
 	public:
-		Node * location;
+		HexNode * location;
 		bool isPortCity;//convience
 		Piece * currentProduction;
 		int productionDaysRemaining;
