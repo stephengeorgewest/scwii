@@ -1,15 +1,15 @@
-#include "Direction.h"
+#include "HexDirection.h"
 #include <iostream>
 
-Direction& operator++(Direction& d, int) // postfix ++
+HexDirection& operator++(HexDirection& d, int) // postfix ++
 {
 	if (d == WEST)
 		return d = NORTH_WEST; //rollover
 	int temp = d; //convert to an int
-	return d = static_cast<Direction> (++temp);
+	return d = static_cast<HexDirection> (++temp);
 }
 
-Direction operator+(Direction d, int number)
+HexDirection operator+(HexDirection d, int number)
 {
 	int n_;
 	if(number >6)
@@ -17,13 +17,13 @@ Direction operator+(Direction d, int number)
 	else
 		n_=number;
 	int temp = (int)d+n_;
-	Direction d1;
+	HexDirection d1;
 	if(temp> 5)
-		return d1 = static_cast<Direction>(temp-6);
+		return d1 = static_cast<HexDirection>(temp-6);
 	else
-		return d1 = static_cast<Direction>(temp);
+		return d1 = static_cast<HexDirection>(temp);
 }
-Direction operator-(Direction d, int number)
+HexDirection operator-(HexDirection d, int number)
 {
 	int n_;
 	if(number >6)
@@ -31,19 +31,19 @@ Direction operator-(Direction d, int number)
 	else 
 		n_=number;
 	int temp = (int)d-n_;
-	Direction d1;
+	HexDirection d1;
 	if(temp< 0)
-		return d1 = static_cast<Direction>(temp+6);
+		return d1 = static_cast<HexDirection>(temp+6);
 	else
-		return d1 = static_cast<Direction>(temp);
+		return d1 = static_cast<HexDirection>(temp);
 }
-Direction operator~(Direction dir)
+HexDirection operator~(HexDirection dir)
 {
-	Direction d;
+	HexDirection d;
 	return d = dir+3;
 }
 /*
-ostream& operator<<(ostream& os, Direction d)
+ostream& operator<<(ostream& os, HexDirection d)
 {
 		char* s;
 		switch (d) {

@@ -10,22 +10,21 @@ for hex grid
 http://www.gamedev.net/reference/articles/article1800.asp
 */
 
-class Node;
-
 class Map
 {
 	public:
-		Map(int width, int height);
+		Map(int w, int h){width = w; height = h;}
+		
+		//change to use moveMap(int x, int y) or such
+		//to keep nodes internal
+		//void SetStart();
 		void DrawMap();
+		void moveMap(int x, int y);
 	//private:
 		int width;
 		int height;
-		Node * prime;
-		Node * anti_prime;
-		Node * north_pole;
-		Node * south_pole;
-		Node * east_pole;
-		Node * west_pole;
+	private:
+
 	
 };
 
