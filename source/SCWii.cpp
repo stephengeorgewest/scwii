@@ -61,8 +61,6 @@ _break();*/
 	HexNode * current_selected;
 	current_selected=gameboard.prime;
 	
-	Terrain * land = new Terrain(256,256,.7);
-	
 	bool done = true;
 	while(!done)
 	{
@@ -200,8 +198,12 @@ _break();*/
 		GRRLIB_Render();
 		//VIDEO_WaitVSync();
 	}
-	//(*land).Draw(true);
-	//GRRLIB_Render();
+	
+	Terrain * land = new Terrain(19,16,.7,true);
+	netCon.sendMessage("Terrain initialized");
+	
+	(*land).Draw(false);
+	GRRLIB_Render();
 	done = false;
 	while(!done)
 	{
@@ -213,12 +215,12 @@ _break();*/
 			done=true;
 		if(pressed & WPAD_BUTTON_A)
 		{
-			delete[] land;
-			land = new Terrain(256,256,.7);
+			delete land;
+			land = new Terrain(256,256,.7,true);
 		}
 		
 	}
-	delete[] land;
+	delete land;
 	netCon.sendMessage("closing");
 	GRRLIB_Exit();
 	//close java client
