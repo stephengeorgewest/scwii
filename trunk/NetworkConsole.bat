@@ -1,0 +1,1 @@
+"C:\Program Files\Java\jdk1.6.0_18\bin\java.exe" -cp C:\Users\Stephen\workspace\NetworkConsole\bin\; networkConsole.NetworkConsole
