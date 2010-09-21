@@ -2,9 +2,16 @@
 #include <stdlib.h>
 #include <gccore.h>
 #include <wiiuse/wpad.h>
+#include <string>
 #include "NetworkConsole.h"
 #include "Map.h"
-
+#include "Node.h"
+/*
+http://en.wikipedia.org/wiki/Strategic_Conquest
+*/
+NetworkConsole netCon;
+using namespace std;
+void dir_test();
 int main(void)
 {
 
@@ -25,16 +32,261 @@ int main(void)
 	printf("\x1b[2;0H");
 	printf("Hello World!\n");
 	printf("initializing network console\n");
-	NetworkConsole netCon;
-	netCon.send_message("Hello from Wii");
-	printf("down + home to exit");
-	Map gameboard;
-	while(true)
+	netCon.Init();
+	netCon.send_message("Hello from Wii\n");
+	printf("Home to exit");
+	
+	dir_test();
+	
+	Map gameboard(2,2);
+	netCon.send_message("map initialized\n");
+	bool done = false;
+	Node * current_selected;
+	current_selected=gameboard.prime;
+	while(!done)
 	{
 		WPAD_ScanPads();
-		if (WPAD_ButtonsDown(0) & WPAD_BUTTON_HOME)
-			exit(0);
+		u32 pressed = WPAD_ButtonsDown(0);
+		u32 held = WPAD_ButtonsHeld(0);
+		if(pressed & WPAD_BUTTON_HOME)
+			done=true;
+		
+		if((pressed & WPAD_BUTTON_RIGHT) &&
+			!(held & (WPAD_BUTTON_UP | WPAD_BUTTON_DOWN))
+			)
+		{
+			Node * next = current_selected->neighbor[EAST];
+			if(next != 0 )
+			{
+				netCon.send_message("\n\nMoving East");
+				current_selected = next;
+			}
+			else
+				netCon.send_message("\n\n East NULL Node");
+			
+		}
+		if(
+			(pressed & WPAD_BUTTON_LEFT) &&
+			!(held & (WPAD_BUTTON_UP | WPAD_BUTTON_DOWN))
+			)
+		{
+			
+			Node * next = current_selected->neighbor[WEST];
+			if(next != 0 )
+			{
+				current_selected = next;
+				netCon.send_message("\n\nMoving West");
+			}
+			else
+				netCon.send_message("\n\n West NULL Node");
+		}
+		
+		
+		//North and south
+		if(
+			(pressed & WPAD_BUTTON_LEFT) &&
+			(held & (WPAD_BUTTON_UP))
+			)
+		{
+			
+			Node * next = current_selected->neighbor[NORTH_WEST];
+			if(next != 0 )
+			{
+				current_selected = next;
+				netCon.send_message("\n\nMoving NOrth West");
+			}
+			else
+				netCon.send_message("\n\n NOrth West NULL Node");
+		}
+		if(
+			(pressed & WPAD_BUTTON_RIGHT) &&
+			(held & (WPAD_BUTTON_UP))
+			)
+		{
+			
+			Node * next = current_selected->neighbor[NORTH_EAST];
+			if(next != 0 )
+			{
+				current_selected = next;
+				netCon.send_message("\n\nMoving NOrth East");
+			}
+			else
+				netCon.send_message("\n\n NOrth east NULL Node");
+		}
+		
+		
+		if(
+			(pressed & WPAD_BUTTON_LEFT) &&
+			(held & (WPAD_BUTTON_DOWN))
+			)
+		{
+			
+			Node * next = current_selected->neighbor[SOUTH_WEST];
+			if(next != 0 )
+			{
+				current_selected = next;
+				netCon.send_message("\n\nMoving SOUTH West");
+			}
+			else
+				netCon.send_message("\n\n SOUTH West NULL Node");
+		}
+		if(
+			(pressed & WPAD_BUTTON_RIGHT) &&
+			(held & (WPAD_BUTTON_DOWN))
+			)
+		{
+			
+			Node * next = current_selected->neighbor[SOUTH_EAST];
+			if(next != 0 )
+			{
+				current_selected = next;
+				netCon.send_message("\n\nMoving SOUTH EAST");
+			}
+			else
+				netCon.send_message("\n\n SOUTH East NULL Node");
+		}
+		
+		
+		
+		//print current node
+		if(pressed & WPAD_BUTTON_A)// | WPAD_BUTTON_DOWN))
+		{
+			//string str = new string(current_selected);
+			char buf[64];
+			sprintf(buf, "\nCurrent Node - %i", current_selected->ID);
+			netCon.send_message(buf);
+			if(current_selected->isGround)
+				netCon.send_message(" -ground");
+			else
+				netCon.send_message(" -water");
+			if(current_selected->city)
+				netCon.send_message(" -city");
+			if(current_selected ==gameboard.prime)
+				netCon.send_message(" -prime");
+			if(current_selected ==gameboard.east_pole)
+				netCon.send_message(" -east_pole");
+			if(current_selected ==gameboard.anti_prime)
+				netCon.send_message(" -anti_prime");
+			if(current_selected ==gameboard.west_pole)
+				netCon.send_message(" -west_pole");
+			if(current_selected ==gameboard.north_pole)
+				netCon.send_message(" -north_pole");
+			if(current_selected ==gameboard.south_pole)
+				netCon.send_message(" -south_pole");
+		}
+		
 		VIDEO_WaitVSync();
 	}
+	netCon.send_message("closing");
+	
+	if (consoleframeBuffer != 0)
+	{
+		free(MEM_K1_TO_K0(consoleframeBuffer)); 
+		consoleframeBuffer  = 0;
+	}
+	//close java client
+	//netCon.send_message("exit");
+	//exit(0);
 	return(0);
+}
+void dir_test()
+{
+	Direction e=EAST,se=SOUTH_EAST,sw=SOUTH_WEST,w=WEST,nw=NORTH_WEST,ne=NORTH_EAST;
+	netCon.send_message("Direction Test");
+	char buffer[256];
+	sprintf(buffer,"\
+		EAST %i,\
+		SOUTH_EAST %i,\
+		SOUTH_WEST %i,\
+		WEST %i,\
+		NORTH_WEST %i,\
+		NORTH_EAST %i",
+		
+		e,
+		se,
+		sw,
+		w,
+		nw,
+		ne);
+	netCon.send_message(buffer);
+	
+	sprintf(buffer,"\
+		EAST+1 %i,\
+		SOUTH_EAST+1 %i,\
+		SOUTH_WEST+1 %i,\
+		WEST+1 %i,\
+		NORTH_WEST+1 %i,\
+		NORTH_EAST+1 %i",
+		
+		EAST+1,
+		se+1,
+		sw+1,
+		w+1,
+		nw+1,
+		ne+1);
+	netCon.send_message(buffer);
+	
+	sprintf(buffer,"\
+		EAST %i,\
+		SOUTH_EAST %i,\
+		SOUTH_WEST %i,\
+		WEST %i,\
+		NORTH_WEST %i,\
+		NORTH_EAST %i",
+		
+		EAST,
+		se,
+		sw,
+		w,
+		nw,
+		ne);
+	netCon.send_message(buffer);
+	
+	sprintf(buffer,"\
+		EAST-1 %i,\
+		SOUTH_EAST-1 %i,\
+		SOUTH_WEST-1 %i,\
+		WEST-1 %i,\
+		NORTH_WEST-1 %i,\
+		NORTH_EAST-1 %i",
+		
+		EAST-1,
+		se-1,
+		sw-1,
+		w-1,
+		nw-1,
+		ne-1);
+	netCon.send_message(buffer);
+	
+	sprintf(buffer,"\
+		EAST-1 %i,\
+		SOUTH_EAST-1 %i,\
+		SOUTH_WEST-1 %i,\
+		WEST-1 %i,\
+		NORTH_WEST-1 %i,\
+		NORTH_EAST-1 %i",
+		
+		EAST-1,
+		se-1,
+		sw-1,
+		w-1,
+		nw-1,
+		ne-1);
+	netCon.send_message(buffer);
+	
+	sprintf(buffer,"\
+		~EAST %i,\
+		~SOUTH_EAST %i,\
+		~SOUTH_WEST %i,\
+		~WEST %i,\
+		~NORTH_WEST %i,\
+		~NORTH_EAST %i",
+		
+		~EAST,
+		~se,
+		~sw,
+		~w,
+		~nw,
+		~ne);
+	netCon.send_message(buffer);
 }
