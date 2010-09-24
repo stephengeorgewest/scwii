@@ -7,7 +7,7 @@
 
 #include <grrlib.h>
 //http://www.lighthouse3d.com/opengl/terrain/index.php?mpd2
-#define RAND_RANGE 1.0
+#define RAND_RANGE 10.0
 
 //for debug created in SCWii.cpp
 #include "NetworkConsole.h"
@@ -20,13 +20,13 @@ Terrain::Terrain(int w, int h, float decay_, bool map_wrap)
 	height = h;
 	try
 	{
-	 this->map=new float*[width];
+	 this->map=new float*[height];
 	}
 	catch (std::bad_alloc& ba)
 	{
 	netCon.sendMessage(ba.what());
 	}
-	for(int i=0; i<width; i++)
+	for(int i=0; i<height; i++)
 	{
 	try{
 		this->map[i] = new float[width];
@@ -62,15 +62,23 @@ netCon.sendMessage(str);
 #ifdef DEBUG
 netCon.sendMessage("Entering this->TerrainPow2Square");
 #endif
-	this->TerrainPow2Square(pow, decay, true);//Terrain& Up, Terrain& Right, Terrain& Down, Terrain& Left);
+	this->TerrainPow2Square(pow, decay_, true);//Terrain& Up, Terrain& Right, Terrain& Down, Terrain& Left);
 		
 	//finish off non square pow2section
 	for(int y=0; y<height_2; y++)
 		for(int x=width_2; x<width;x++)
-			map[y][x] = 0;
+		{
+			float val = (float)x-this->max*floor(float(x)/this->max);
+			map[y][x] = val;
+			map[y][x] = (this->max+this->min)/2-(this->max+this->min)/4;
+		}
 	for(int y=height_2; y<height;y++)
 		for(int x = 0;x<width; x++)
-			map[y][x] = 0;
+		{
+			float val = (float)x-this->max*floor(float(x)/this->max);
+			map[y][x] = val;
+			map[y][x] = (this->max+this->min)/2+(this->max+this->min)/4;
+		}
 	/*if(width_2==width&&height_2==height)
 	{
 //netCon.sendMessage("copying over pointer");
@@ -146,7 +154,7 @@ netCon.sendMessage(str);
 
 	max_ = min_ = this->map[0][0] = 0 + r;
 		
-	int decay = 1;
+	float decay = 1;
 #ifdef DEBUG
 sprintf(str, "\n\nsquare loop pow=%i, width_=%i, r=%f",pow,width_,r);
 netCon.sendMessage(str);
@@ -393,7 +401,7 @@ Terrain::Draw(bool display)
 		for(int j = 0; j<rmode->fbWidth; j++)
 		{
 		//scale to 0...255
-			float normalized = (map[j%height][i%width]-min)*511.0/(max-min);
+			float normalized = (map[i%height][j%width]-min)*511.0/(max-min);
 			if(display && j<10 && i<10)
 			{
 				sprintf(str, "value at %i,%i = %f", j%height, i%width, normalized);
