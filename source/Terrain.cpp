@@ -2,7 +2,17 @@
 #include <limits.h>
 #include <time.h>
 #include <stdlib.h>
-//#define DEBUG
+#define DEBUG1
+#ifdef DEBUG3
+	#define DEBUG2
+#endif
+#ifdef DEBUG2
+	#define DEBUG1
+#endif
+#ifdef DEBUG1
+	#define DEBUG
+#endif
+
 #include <debug.h>
 
 #include <grrlib.h>
@@ -62,23 +72,32 @@ netCon.sendMessage(str);
 #ifdef DEBUG
 netCon.sendMessage("Entering this->TerrainPow2Square");
 #endif
-	this->TerrainPow2Square(pow, decay_, true);//Terrain& Up, Terrain& Right, Terrain& Down, Terrain& Left);
+	decay = this->TerrainPow2Square(pow, decay_, true);//Terrain& Up, Terrain& Right, Terrain& Down, Terrain& Left);
 		
 	//finish off non square pow2section
+	for(int x=width_2; x<width;x++)
 	for(int y=0; y<height_2; y++)
-		for(int x=width_2; x<width;x++)
+	{
 		{
 			float val = (float)x-this->max*floor(float(x)/this->max);
 			map[y][x] = val;
-			map[y][x] = (this->max+this->min)/2-(this->max+this->min)/4;
+			map[y][x] = (this->max+this->min)/4;
 		}
+	}
+	for(int y=0; y<height_2; y++)
+	{
+		map[y][width-1] = (this->max+this->min)/8;
+	}
+	this->StretchHorizontal(width_2, this->width, decay_,decay);
 	for(int y=height_2; y<height;y++)
-		for(int x = 0;x<width; x++)
+	for(int x = 0;x<width; x++)
+	{
 		{
 			float val = (float)x-this->max*floor(float(x)/this->max);
 			map[y][x] = val;
 			map[y][x] = (this->max+this->min)/2+(this->max+this->min)/4;
 		}
+	}
 	/*if(width_2==width&&height_2==height)
 	{
 //netCon.sendMessage("copying over pointer");
@@ -135,15 +154,16 @@ netCon.sendMessage(str);
 	min = min_;
 }
 
-void
+float
 Terrain::TerrainPow2Square(int pow, float decay_, bool wrap)//Terrain& Up, Terrain& Right, Terrain& Down, Terrain& Left)
 {
 #ifdef DEBUG
 netCon.sendMessage("In TerrainPow2Square");
 #endif
 	int width_ = 1<<pow;
-	int height_ = width_;
+#ifdef DEBUG
 char str[128];	
+#endif
 	srand(time(0));
 	float max_,min_;
 	float r = (float)rand()/(float)RAND_MAX*(RAND_RANGE)-RAND_RANGE/2;
@@ -155,7 +175,7 @@ netCon.sendMessage(str);
 	max_ = min_ = this->map[0][0] = 0 + r;
 		
 	float decay = 1;
-#ifdef DEBUG
+#ifdef DEBUG1
 sprintf(str, "\n\nsquare loop pow=%i, width_=%i, r=%f",pow,width_,r);
 netCon.sendMessage(str);
 #endif
@@ -185,7 +205,7 @@ netCon.sendMessage(str);
 					min_ = E;
 				if(E>max_)
 					max_ = E;
-#ifdef DEBUG
+#ifdef DEBUG2
 sprintf(str, "\n\nsquare loop i=%i, j=%i, k=%i",i,j,k);
 netCon.sendMessage(str);
 sprintf(str, "[%i][%i] A = %f",j-i/2, k-i/2,A);
@@ -230,7 +250,7 @@ sprintf(str, "[%i][%i] E = %f",(j), (k), E);
 					min_ = E;
 				if(E>max_)
 					max_ = E;
-#ifdef DEBUG				
+#ifdef DEBUG2			
 sprintf(str, "\ndiamond loop even rows i=%i, j=%i, k=%i",i,j,k);
 	netCon.sendMessage(str);
 sprintf(str, "[%i][%i] Left = %f",(j), (k-i/2),Left);
@@ -268,7 +288,7 @@ sprintf(str, "[%i][%i] E = %f",(j), (k), E);
 				if(E>max_)
 					max_ = E;
 					
-#ifdef DEBUG				
+#ifdef DEBUG2			
 sprintf(str, "\ndiamond loop odd rows i=%i, j=%i, k=%i",i,j,k);
 	netCon.sendMessage(str);
 sprintf(str, "[%i][%i] Left = %f",(j), k_i_2, Left);
@@ -290,36 +310,104 @@ sprintf(str, "[%i][%i] val = %f",(j), (k),E);
 //	return map_2;
 this->min=min_;
 this->max=max_;
+	return decay;
 }
-void
-Terrain::StretchHorizontal(float**m, int current_width, int final_width)
+float
+Terrain::StretchHorizontal(int current_width, int final_width, float decay_, float start_decay)
 {
-netCon.sendMessage("Allocating real map");
+#ifdef DEBUG
+char str[128];
+netCon.sendMessage("StretchHorizontal");
+#endif
 	//fill out gaps in map
 	// using midpoint 
 	// not diamond
-	/*float ** map_WIDE=new float*[height];
-	for(int i=0; i<height_2; i++)
+	float decay = start_decay;
+	if(final_width>2*current_width)
 	{
-		map_WIDE[i] = new float[width];
+		decay = this->StretchHorizontal(current_width, final_width/2, decay_, start_decay);
 	}
-sprintf(str,"height_2=%i, width_2=%i\nheight =%i, width = %i",height_2,width_2,height,width );
-netCon.sendMessage(str);
+		decay*=decay_;
+	float range = RAND_RANGE*decay;
 	//should always be greater than two.
 	// unless width==width_2
-	int horizontal_gap = width/(width-width_2);
-	for(int i=0, fill_count=0; i<width_2;i++)
-	{
-sprintf(str, "\n\nFill loop i=%i, gap=%i, (i #)=%i",i,horizontal_gap,(i%horizontal_gap));
+	int horizontal_gap = final_width/(final_width-current_width);
+#ifdef DEBUG2
+sprintf(str,"Current_width=%i, Final_width=%i, decay =%f, start_d = %f, h_gap = %i",current_width, final_width, decay, start_decay, horizontal_gap);
 netCon.sendMessage(str);
-		if((i)%horizontal_gap)
+#endif
+	for(int i=final_width-1, fill_count=final_width-current_width; fill_count>0;i--)
+	{
+#ifdef DEBUG2
+sprintf(str, "\n\nFill loop i=%i, fill_c=%i, (i #)=%i",i,fill_count,(i%horizontal_gap));
+netCon.sendMessage(str);
+#endif
+//return decay_;
+
+
+		if((i)%horizontal_gap==0)
 		{
-			
-			for(int j=0; j<height_2; j++)
+#ifdef DEBUG2
+sprintf(str, "Fill Column %i",i);
+netCon.sendMessage(str);
+#endif
+			//do Square mid points
+			int height_2=1<<((int)(log2(this->height)));
+			for(int j=0; j<height_2; j+=2)
+			{
+				int up;
+				if(j==0)
+					up = height_2-1;
+				else
+					up = j-1;
+				int left;
+				if(i-fill_count<0)//should never happen
+					left = i-fill_count-1+this->width;
+				else
+					left = i-fill_count;
+				int right = (i+1)%this->width;
+				int down = (j+1)%(height_2);
+				float A = this->map[ up ][left ];
+				float B = this->map[  j ][left ];
+				float C = this->map[down][left ];
+				float D = this->map[ up ][right];
+				float E = this->map[  j ][right];
+				float F = this->map[down][right];
+				float r = (float)rand()/(float)RAND_MAX*(range)-range/2;
+				float G = 
+					this->map[j][i] = (A+B+C+D+E+F)/6+r;
+				if(G<this->min)
+					this->min = G;
+				if(G>this->max)
+					this->max= G;
+#ifdef DEBUG2
+if(/*(j>height_2-3 && i>this->width-horizontal_gap) ||*/ G>this->max || G<this->min)
+{ 
+sprintf(str, "\n\nFill loop i=%i, j=%i, fill_count=%i",i,j,fill_count);
+netCon.sendMessage(str);
+sprintf(str, "[%i][%i] A = %f",up, left,A);
+netCon.sendMessage(str);
+sprintf(str, "[%i][%i] B = %f",j, left,B);
+netCon.sendMessage(str);
+sprintf(str, "[%i][%i] C = %f",down, left,C);
+netCon.sendMessage(str);
+sprintf(str, "[%i][%i] D = %f",up, right,D);
+netCon.sendMessage(str);
+sprintf(str, "[%i][%i] E = %f",j, right,E);
+netCon.sendMessage(str);
+sprintf(str, "[%i][%i] F = %f",down, right,F);
+netCon.sendMessage(str);
+sprintf(str, "[%i][%i] G = %f",(j), (i), G);
+netCon.sendMessage(str);
+}
+#endif
+			}
+			//do Diamond mid points
+			/*for(int j=1; j<height; j+=2)
 			{
 				int up;
 				if(j-1<0)
-					up = j-1+height_2;
+					up = j-1+height;
 				else
 					up = j-1;
 				int left;
@@ -338,11 +426,11 @@ netCon.sendMessage(str);
 				float r = (float)rand()/(float)RAND_MAX*(range)-range/2;
 				float G = 
 					map[j][i] = (A+B+C+D+E+F)/6+r;
-		//	if(G<min_)
-		//		min_ = G;
-		//	if(G>max_)
-		//		max_ = G;
-				if(j==height_2-1)
+				if(G<min)
+					min = G;
+				if(G>max)
+					max_= G;
+				if(j<10)
 { 
 sprintf(str, "\n\nFill loop i=%i, j=%i, fill_count=%i",i,j,fill_count);
 netCon.sendMessage(str);
@@ -361,20 +449,23 @@ netCon.sendMessage(str);
 sprintf(str, "[%i][%i] G = %f",(j), (i+fill_count), G);
 netCon.sendMessage(str);
 }
-			}
-			fill_count++;
+			}*/
+			fill_count--;
 		
 		}
 		else//not a fill column copy and continue
 		{
-			netCon.sendMessage("copy column");
-			for(int j=0; j<height_2; j++)
+#ifdef DEBUG2
+sprintf(str, "Copy Column %i", i);
+netCon.sendMessage(str);
+#endif
+			for(int j=0; j<height; j++)
 			{
-				map[j][i+fill_count] = map_2[j][i];
+				map[j%height][i] = map[j][(i-fill_count)%width];
 			}
 		}
-	}*/
-return;
+	}
+return decay;
 }
 void
 Terrain::StreachVertical()
