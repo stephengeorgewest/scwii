@@ -205,6 +205,7 @@ _break();*/
 	(*land).Draw(false);
 	GRRLIB_Render();
 	done = false;
+	float decay = 0.7;
 	while(!done)
 	{
 		(*land).Draw(false);
@@ -213,10 +214,17 @@ _break();*/
 		u32 pressed = WPAD_ButtonsDown(0);
 		if(pressed & WPAD_BUTTON_HOME)
 			done=true;
+		if((pressed & WPAD_BUTTON_PLUS) && decay<1.0)
+			decay+=0.01;
+		if((pressed & WPAD_BUTTON_MINUS) && decay>=0.0)
+			decay-=0.01;
 		if(pressed & WPAD_BUTTON_A)
 		{
+			char str[128];
 			delete land;
-			land = new Terrain(256,256,.7,true);
+			land = new Terrain(280,260,decay,true);
+			sprintf(str,"decay=%f, max=%f, min=%f",decay, land->max,land->min);
+			netCon.sendMessage(str);
 		}
 		
 	}
