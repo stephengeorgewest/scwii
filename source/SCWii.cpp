@@ -209,7 +209,7 @@ _break();*/
 	done = false;
 	while(!done)
 	{
-		(*land).Draw(false, seaLevel);
+		(*land).Draw(seaLevel);
 		GRRLIB_Render();
 		WPAD_ScanPads();
 		u32 pressed = WPAD_ButtonsDown(0);

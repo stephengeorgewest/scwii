@@ -13,7 +13,7 @@ class Terrain
 		float StretchVertical(int current_width, int final_width, float decay_, float start_decay);
 		void Normalize();
 		~Terrain();
-		void Draw(bool display, float seaLevel);
+		void Draw(float seaLevel);
 };
 
 #endif
