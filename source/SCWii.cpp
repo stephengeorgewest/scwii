@@ -199,16 +199,17 @@ _break();*/
 		//VIDEO_WaitVSync();
 	}
 	
-	Terrain * land = new Terrain(19,16,.7,true);
+	int w = 640, h = 480;
+	
+	float decay = 0.7;
+	float seaLevel = 0.65;
+	Terrain * land = new Terrain(w, h, decay, true);
 	netCon.sendMessage("Terrain initialized");
 	
-	(*land).Draw(false);
-	GRRLIB_Render();
 	done = false;
-	float decay = 0.7;
 	while(!done)
 	{
-		(*land).Draw(false);
+		(*land).Draw(false, seaLevel);
 		GRRLIB_Render();
 		WPAD_ScanPads();
 		u32 pressed = WPAD_ButtonsDown(0);
@@ -218,11 +219,16 @@ _break();*/
 			decay+=0.01;
 		if((pressed & WPAD_BUTTON_MINUS) && decay>=0.0)
 			decay-=0.01;
+		if((pressed & WPAD_BUTTON_DOWN) && seaLevel<1.0)
+			seaLevel+=0.01;
+		if((pressed & WPAD_BUTTON_UP) && seaLevel>=0.0)
+			seaLevel-=0.01;
 		if(pressed & WPAD_BUTTON_A)
 		{
 			char str[128];
 			delete land;
-			land = new Terrain(280,260,decay,true);
+			netCon.sendMessage("land Deleted");
+			land = new Terrain(w, h, decay, true);
 			sprintf(str,"decay=%f, max=%f, min=%f",decay, land->max,land->min);
 			netCon.sendMessage(str);
 		}
