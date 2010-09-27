@@ -3,6 +3,7 @@
 #include "HexMap.h"
 #include "City.h"
 #include "HexNode.h"
+#include "Terrain.h"
 
 #include <grrlib.h>
 
