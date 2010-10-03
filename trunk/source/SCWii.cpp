@@ -6,6 +6,7 @@
 #include <wiiuse/wpad.h>
 
 #include <grrlib.h>
+#include "FreeMonoBold_ttf.h"
 #include <debug.h>
 #include <network.h>
 #include <unistd.h>
@@ -38,6 +39,8 @@ int main(void)
 	GRRLIB_Settings.antialias = true;
 	// Black background
 	GRRLIB_SetBackgroundColour(0x00, 0x00, 0x00, 0xFF);
+	// Load the font from memory
+	GRRLIB_ttfFont *myFont = GRRLIB_LoadTTF(FreeMonoBold_ttf, FreeMonoBold_ttf_size);
 	
 	/*
 	char localip[16] = {0};
@@ -199,23 +202,33 @@ _break();*/
 		//VIDEO_WaitVSync();
 	}
 	
-	int w = 640, h = 480;
+	int w = 512, h = 256;
 	
 	float decay = 0.7;
-	float seaLevel = 0.65;
+	//float seaLevel = 0.65;
+	int start_x=10, start_y=10;
 	Terrain * land = new Terrain(w, h, decay, true);
 	netCon.sendMessage("Terrain initialized");
 	
 	done = false;
 	while(!done)
 	{
-		(*land).Draw(seaLevel);
+		GRRLIB_FillScreen(0xFFaaaaFF);
+		(*land).Draw(0,0);//start_x,start_y);
+		char str[128];
+			sprintf(str, "Width = %i, Height = %i", w, h );
+			GRRLIB_PrintfTTF(50,
+						rmode->efbHeight - 50,
+						myFont,
+						str,
+						20,
+						0xFFFFFFFF);
 		GRRLIB_Render();
 		WPAD_ScanPads();
 		u32 pressed = WPAD_ButtonsDown(0);
 		if(pressed & WPAD_BUTTON_HOME)
 			done=true;
-		if((pressed & WPAD_BUTTON_PLUS) && decay<1.0)
+		/*if((pressed & WPAD_BUTTON_PLUS) && decay<1.0)
 			decay+=0.01;
 		if((pressed & WPAD_BUTTON_MINUS) && decay>=0.0)
 			decay-=0.01;
@@ -223,6 +236,29 @@ _break();*/
 			seaLevel+=0.01;
 		if((pressed & WPAD_BUTTON_UP) && seaLevel>=0.0)
 			seaLevel-=0.01;
+		*/
+		if(WPAD_ButtonsHeld(0) & WPAD_BUTTON_B)
+		{
+			if((pressed & WPAD_BUTTON_DOWN) )
+				h++;
+			if((pressed & WPAD_BUTTON_UP) && h>=0)
+				h--;
+			if((pressed & WPAD_BUTTON_LEFT) && w >=0)
+				w--;
+			if((pressed & WPAD_BUTTON_RIGHT) )
+				w++;
+		}
+		else
+		{
+			if((pressed & WPAD_BUTTON_DOWN) )
+				start_y+=10;
+			if((pressed & WPAD_BUTTON_UP) )
+				start_y-=10;
+			if((pressed & WPAD_BUTTON_LEFT) )
+				start_x-=10;
+			if((pressed & WPAD_BUTTON_RIGHT) )
+				start_x+=10;
+		}
 		if(pressed & WPAD_BUTTON_A)
 		{
 			char str[128];
