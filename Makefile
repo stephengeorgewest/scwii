@@ -23,7 +23,7 @@ include $(DEVKITPPC)/wii_rules
 TARGET		:=	$(notdir $(CURDIR))
 BUILD		:=	build
 SOURCES		:=	source
-DATA		:=
+DATA		:=  data
 TEXTURES	:=	textures
 INCLUDES	:=  include
 
@@ -151,6 +151,16 @@ $(OUTPUT).elf: $(OFILES)
 
 
 -include $(DEPSDIR)/*.d
+
+#---------------------------------------------------------------------------------
+# This rule links in binary data with the .ttf extension
+#---------------------------------------------------------------------------------
+%.ttf.o	:	%.ttf
+#---------------------------------------------------------------------------------
+	@echo $(notdir $<)
+	$(bin2o)
+
+-include $(DEPENDS)
 
 #---------------------------------------------------------------------------------
 endif
