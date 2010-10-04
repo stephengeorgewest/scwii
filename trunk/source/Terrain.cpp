@@ -55,8 +55,8 @@ Terrain::Terrain(int w, int h, float decay_, bool map_wrap)
 	decay = this->TerrainPow2Square(pow, decay_, true);//Terrain& Up, Terrain& Right, Terrain& Down, Terrain& Left);
 		
 	//finish off non square pow2section
-	this->StretchHorizontal(1<<pow, this->width, decay_,decay);
-	this->StretchVertical(1<<pow, this->height, decay_,decay);
+	this->StretchHorizontal(1<<pow, this->width, decay_,decay*decay_);
+	this->StretchVertical(1<<pow, this->height, decay_,decay*decay_*decay_);
 	this->Normalize();
 	this->RenderTerrain();
 }
@@ -102,11 +102,11 @@ void Terrain::diamond_square(int x, int y, int half_step,
 		
 	int up = y-half_step-v_gap;
 	if(up<0)
-		up+=h;
+		up += h;
 	
 	int down = y+half_step;
 	if(down>=h)
-		down-=h;
+		down -= h;
 		
 	float A,B,C,D;
 	float r = (float)rand()/(float)RAND_MAX*(range)-range/2;
@@ -161,6 +161,8 @@ Terrain::TerrainPow2Square(int pow, float decay_, bool wrap)//Terrain& Up, Terra
 				diamond_square( x, y, i/2, 0, 0, width_,  width_, range, SQUARE);
 			}
 		}
+		//??
+		decay*=decay_;
 		//diamond corners
 		for(int y=0; y<width_; y+=i/2)
 		{
@@ -199,31 +201,35 @@ Terrain::StretchHorizontal(int current_width_, int final_width, float decay_, fl
 	float range = RAND_RANGE*decay;
 	//should always be greater than two.
 	// unless width==width_2
-	int horizontal_gap = final_width/(final_width-current_width);
-	for(int x=final_width-1, fill_count=final_width-current_width; fill_count>0;x--)
+	float horizontal_gap = final_width/(final_width-current_width);
+	float count = horizontal_gap;
+	char str[128];
+	for(int x=final_width-1; final_width-current_width>0;x--)
 	{
-		if((x)%horizontal_gap==0)
+		if(count>=horizontal_gap)
 		{
+			count-=horizontal_gap;
 			//do Square mid points
 			int height_2=1<<((int)(log2(this->height)));
 			for(int y=0; y<height_2; y+=2)
 			{
-				diamond_square( x, y, 1, fill_count, 0, final_width,  height_2, range, SQUARE);
+				diamond_square( x, y, 1, final_width-current_width, 0, final_width,  height_2, range, SQUARE);
 			}
 			//do Diamond mid points
 			for(int y=1; y<height_2; y+=2)
 			{
-				diamond_square( x, y, 1, fill_count, 0, final_width,  height_2, range, DIAMOND);
+				diamond_square( x, y, 1, final_width-current_width, 0, final_width,  height_2, range, DIAMOND);
 			}
-			fill_count--;
+			current_width++;
 		}
 		else//not a fill column copy and continue
 		{
 			for(int y=0; y<height; y++)
 			{
-				map[y%height][x] = map[y][(x-fill_count)%width];
+				map[y%height][x] = map[y][(x-(final_width-current_width))%width];
 			}
 		}
+		count++;
 	}
 return decay;
 }
@@ -244,32 +250,34 @@ Terrain::StretchVertical(int current_height_, int final_height, float decay_, fl
 	float range = RAND_RANGE*decay;
 	//should always be greater than two.
 	// unless width==width_2
-	int vertical_gap = final_height/(final_height-current_height);
-	for(int y=final_height-1, fill_count=final_height-current_height; fill_count>0;y--)
+	float vertical_gap = final_height/(final_height-current_height);
+	float count = vertical_gap;
+	for(int y=final_height-1; final_height-current_height>0;y--)
 	{
-		if((y)%vertical_gap==0)
+		if(count>vertical_gap)
 		{
+			count-=vertical_gap;
 			//do Square mid points
 			//int height_2=1<<((int)(log2(this->height)));
 			for(int x=0; x<this->width; x+=2)
 			{
-				diamond_square( x, y, 1, 0, fill_count, this->width, final_height, range, SQUARE);
+				diamond_square( x, y, 1, 0, final_height-current_height, this->width, final_height, range, SQUARE);
 			}
 			//do Diamond mid points
-			for(int x=1; x<width; x+=2)
+			for(int x=1; x<this->width; x+=2)
 			{
-				diamond_square( x, y, 1, 0, fill_count, this->width, final_height, range, DIAMOND);
+				diamond_square( x, y, 1, 0, final_height-current_height, this->width, final_height, range, DIAMOND);
 			}
-			fill_count--;
-		
+			current_height++;
 		}
 		else//not a fill column copy and continue
 		{
 			for(int x=0; x<this->width; x++)
 			{
-				this->map[y%this->height][x] = this->map[(y-fill_count)%this->height][x];
+				this->map[y%this->height][x] = this->map[(y-(final_height-current_height))%this->height][x];
 			}
 		}
+		count++;
 	}
 	return decay;
 }
@@ -294,8 +302,8 @@ Terrain::RenderTerrain()
 	renderer.AddGradientPoint ( 0.5700, utils::Color (0xff, 0xff, 0xdd, 255)); // sand
 	renderer.AddGradientPoint ( 0.6000, utils::Color (0x33, 0x99, 0x00, 255)); // grass
 	renderer.AddGradientPoint ( 0.7000, utils::Color (0x00, 0x77, 0x00, 255)); // forest
-	renderer.AddGradientPoint ( 0.8000, utils::Color (0x44, 0x44, 0x00, 255)); // dirt
-	renderer.AddGradientPoint ( 0.9000, utils::Color (0xaa, 0xaa, 0xaa, 255)); // rock
+	renderer.AddGradientPoint ( 0.8900, utils::Color (0x44, 0x44, 0x00, 255)); // dirt
+	renderer.AddGradientPoint ( 0.9500, utils::Color (0xaa, 0xaa, 0xaa, 255)); // rock
 	renderer.AddGradientPoint ( 0.9800, utils::Color (0xff, 0xff, 0xff, 255)); // snow
 	renderer.EnableLight ();
 	renderer.SetLightContrast (3.0); // Triple the contrast
@@ -312,13 +320,13 @@ Terrain::Draw(int start_x, int start_y)
 
 #define GRRLIB_BLUE    0x0000FF00
 #define GRRLIB_GREEN   0x00FF0000
-//#ifdef OSX
+#ifdef OSX
 	int w = this->width;
 	int h = this->height;
-//#else
-//	int w = rmode->fbWidth;
-//	int h = rmode->efbHeight;
-//#endif;
+#else
+	int w = rmode->fbWidth;
+	int h = rmode->efbHeight;
+#endif;
 	for(int y=0; y<h; y++)
 	{
 		for(int x = 0; x<w; x++)
@@ -338,7 +346,7 @@ Terrain::Draw(int start_x, int start_y)
 				y_+=this->height;
 #ifndef OSX
 			utils::Color c = image.GetValue(x_,y_);
-			GRRLIB_Plot(x+10, y+25, c.red<<24 | c.green<<16 | c.blue<<8 | c.alpha);
+			GRRLIB_Plot(x, y, c.red<<24 | c.green<<16 | c.blue<<8 | c.alpha);
 			/*float num = this->map[y_][x_];
 			if(num == NAN)
 			{

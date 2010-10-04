@@ -202,7 +202,7 @@ _break();*/
 		//VIDEO_WaitVSync();
 	}
 	
-	int w = 512, h = 256;
+	int w = 512, h =560;
 	
 	float decay = 0.7;
 	//float seaLevel = 0.65;
@@ -213,10 +213,10 @@ _break();*/
 	done = false;
 	while(!done)
 	{
-		GRRLIB_FillScreen(0xFFaaaaFF);
-		(*land).Draw(0,0);//start_x,start_y);
+		//GRRLIB_FillScreen(0xFFaaaaFF);
+		(*land).Draw(start_x,start_y);
 		char str[128];
-			sprintf(str, "Width = %i, Height = %i", w, h );
+			sprintf(str, "Width = %i, Height = %i, Decay = %f", w, h, decay);
 			GRRLIB_PrintfTTF(50,
 						rmode->efbHeight - 50,
 						myFont,
@@ -228,11 +228,11 @@ _break();*/
 		u32 pressed = WPAD_ButtonsDown(0);
 		if(pressed & WPAD_BUTTON_HOME)
 			done=true;
-		/*if((pressed & WPAD_BUTTON_PLUS) && decay<1.0)
+		if((pressed & WPAD_BUTTON_PLUS) && decay<1.0)
 			decay+=0.01;
 		if((pressed & WPAD_BUTTON_MINUS) && decay>=0.0)
 			decay-=0.01;
-		if((pressed & WPAD_BUTTON_DOWN) && seaLevel<1.0)
+		/*if((pressed & WPAD_BUTTON_DOWN) && seaLevel<1.0)
 			seaLevel+=0.01;
 		if((pressed & WPAD_BUTTON_UP) && seaLevel>=0.0)
 			seaLevel-=0.01;
