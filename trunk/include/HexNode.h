@@ -21,6 +21,7 @@ class HexNode
 		bool isGround;
 		int ID;
 		GeographicLocation location;
+		int x,y;
 };
 
 #endif

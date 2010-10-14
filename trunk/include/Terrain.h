@@ -21,7 +21,7 @@ class Terrain
 		void Normalize();
 		void diamond_square(int x, int y, int half_step, int w_gap, int v_gap, int w, int h, float range, ds_type ds);
 		void RenderTerrain();
-		
+		float getAverageHeight(int x , int y, int r);
 		~Terrain();
 		void Draw(int start_x, int start_y);
 };
