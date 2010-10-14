@@ -59,13 +59,73 @@ HexNode *
 HexNode::addNeighbor(HexDirection dir)
 {	
 	HexNode * n = new HexNode;
+	switch(dir)
+	{
+		case EAST:
+			n->x=this->x+1;
+			n->y=this->y;
+			break;
+		case WEST:
+			n->x=this->x-1;
+			n->y=this->y;
+			break;
+		case SOUTH_EAST:
+			if(this->y%2==0)
+			{
+				n->x=this->x+;
+				n->y=this->y+1;
+			}
+			else
+			{
+				n->x=this->x+1;
+				n->y=this->y+1;
+			}
+			break;
+		case SOUTH_WEST:
+			if(this->y%2==0)
+			{
+				n->x=this->x-1;
+				n->y=this->y+1;
+			}
+			else
+			{
+				n->x=this->x;
+				n->y=this->y+1;
+			}
+			break;
+		case NORTH_WEST:
+			if(this->y%2==0)
+			{
+				n->x=this->x-1;
+				n->y=this->y-1;
+			}
+			else
+			{
+				n->x=this->x;
+				n->y=this->y-1;
+			}
+			break;
+		case NORTH_EAST:
+			if(this->y%2==0)
+			{
+				n->x=this->x;
+				n->y=this->y-1;
+			}
+			else
+			{
+				n->x=this->x+1;
+				n->y=this->y-1;
+			}
+			break;
+		default:
+			break;
+	}
 	return this->addNeighbor(dir,n);
 }
 HexNode *
 HexNode::addNeighbor(HexDirection dir, HexNode * n)
 {
 	this->connectNodes(dir,n);
-	
 	// check clockwise 3
 	//if(n->ID==9)
 	//{

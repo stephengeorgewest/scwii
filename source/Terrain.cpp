@@ -326,7 +326,9 @@ Terrain::Draw(int start_x, int start_y)
 #else
 	int w = rmode->fbWidth;
 	int h = rmode->efbHeight;
-#endif;
+#endif
+
+
 	for(int y=0; y<h; y++)
 	{
 		for(int x = 0; x<w; x++)
@@ -361,6 +363,33 @@ Terrain::Draw(int start_x, int start_y)
 		}
 	}
 }
+//
+
+float Terrain::getAverageHeight(int x_ , int y_, int r_)
+{
+	// square aproximation for now
+	float avg=0;
+	for(int x = x_-r_; x<x_+r_; x++)
+	for(int y = y_+-r_; y<y_+r_; y++)
+	{
+		int x_wrap=x;
+		while(x_wrap<0)
+			x+=this->width;
+		while(x_wrap>=this->width)
+			x-=this->width;
+		
+		int y_wrap=y;
+		while(y_wrap<0)
+			y+=this->height;
+		while(y_wrap>=this->height)
+			y-=this->height;
+			
+		avg+=map[y_wrap][x_wrap];
+	}
+	avg/=r_*r_;
+	return avg;
+}
+//
 
 
 Terrain::~Terrain()

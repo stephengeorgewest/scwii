@@ -58,13 +58,13 @@ _break();*/
 	
 	//dir_test();
 	
-	HexMap gameboard(20,25);
+	HexMap gameboard(4,2);
 	netCon.sendMessage("map initialized\n");
 	
 	HexNode * current_selected;
 	current_selected=gameboard.prime;
 	
-	bool done = true;
+	bool done = false;
 	while(!done)
 	{
 		WPAD_ScanPads();
@@ -210,7 +210,7 @@ _break();*/
 	Terrain * land = new Terrain(w, h, decay, true);
 	netCon.sendMessage("Terrain initialized");
 	
-	done = false;
+	done = true;
 	while(!done)
 	{
 		//GRRLIB_FillScreen(0xFFaaaaFF);
