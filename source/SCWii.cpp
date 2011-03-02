@@ -58,7 +58,7 @@ _break();*/
 	
 	//dir_test();
 	
-	HexMap gameboard(4,2);
+	HexMap gameboard(2,2);
 	netCon.sendMessage("map initialized\n");
 	
 	HexNode * current_selected;
@@ -85,6 +85,7 @@ _break();*/
 			}
 			else
 				netCon.sendMessage("\n\n East NULL HexNode");
+			gameboard.SetStart(current_selected);
 			
 		}
 		if(
@@ -101,6 +102,7 @@ _break();*/
 			}
 			else
 				netCon.sendMessage("\n\n West NULL HexNode");
+			gameboard.SetStart(current_selected);
 		}
 		
 		
@@ -119,6 +121,7 @@ _break();*/
 			}
 			else
 				netCon.sendMessage("\n\n NOrth West NULL HexNode");
+			gameboard.SetStart(current_selected);
 		}
 		if(
 			(pressed & WPAD_BUTTON_RIGHT) &&
@@ -134,6 +137,7 @@ _break();*/
 			}
 			else
 				netCon.sendMessage("\n\n NOrth east NULL HexNode");
+			gameboard.SetStart(current_selected);
 		}
 		
 		
@@ -151,6 +155,7 @@ _break();*/
 			}
 			else
 				netCon.sendMessage("\n\n SOUTH West NULL HexNode");
+			gameboard.SetStart(current_selected);
 		}
 		if(
 			(pressed & WPAD_BUTTON_RIGHT) &&
@@ -166,6 +171,7 @@ _break();*/
 			}
 			else
 				netCon.sendMessage("\n\n SOUTH East NULL HexNode");
+			gameboard.SetStart(current_selected);
 		}
 		
 		
@@ -196,12 +202,12 @@ _break();*/
 			if(current_selected ==gameboard.south_pole)
 				netCon.sendMessage(" -south_pole");
 		}
-		gameboard.SetStart(current_selected);
 		gameboard.DrawMap();
 		GRRLIB_Render();
 		//VIDEO_WaitVSync();
 	}
 	
+	//Terrain test Section
 	int w = 512, h =560;
 	
 	float decay = 0.7;

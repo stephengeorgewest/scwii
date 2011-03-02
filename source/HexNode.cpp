@@ -72,7 +72,7 @@ HexNode::addNeighbor(HexDirection dir)
 		case SOUTH_EAST:
 			if(this->y%2==0)
 			{
-				n->x=this->x+;
+				n->x=this->x;
 				n->y=this->y+1;
 			}
 			else
