@@ -14,38 +14,79 @@ extern NetworkConsole netCon;
 //widthx4,height x2
 HexMap::~HexMap()
 {
-	delete land;
+	delete this->land;
 }
 HexMap::HexMap(int width, int height):Map( width, height)
 {
-	s=10.0;
+	this->s=10.0;
 	#define PI 3.14159265358979323846264338327950288419716939937510
-	h = sin( 2*PI*30/360 ) * s;
-	float r = cos( 2*PI*30/360 ) * s;
-	b = s + 2 * h;
-	a = 2 * r;
-	land = new Terrain((width*4)*(a+0.5), (height*4+2)*(b+0.5),0.7,true);
+	this->h = sin( 2*PI*30/360 ) * this->s;
+	float r = cos( 2*PI*30/360 ) * this->s;
+	this->b = this->s + 2 * this->h;
+	this->a = 2 * r;
+	this->land = new Terrain((width*4)*((int)(this->a+0.5)), (height*4+2)*((int)(this->b+0.5)),0.7,true);
 	// mercator projection
-	prime = new HexNode(PRIME);
-	prime->x=0;
-	prime->y=2*height;
-	east_pole = new HexNode(EAST_POLE);
-	east_pole->x=width;
-	east_pole->y=2*height;
-	anti_prime=new HexNode(ANTI_PRIME);
-	anti_prime->x=2*width;
-	anti_prime->y=2*height;
-	west_pole = new HexNode(WEST_POLE);
-	west_pole->x=3*width;
-	west_pole->y=2*height;
+	/*
+	this->prime = new HexNode(PRIME);
+	this->prime->x=0;
+	this->prime->y=height;
+	this->east_pole = new HexNode(EAST_POLE);
+	this->east_pole->x=width;
+	this->east_pole->y=height;
+	this->anti_prime=new HexNode(ANTI_PRIME);
+	this->anti_prime->x=2*width;
+	this->anti_prime->y=height;
+	this->west_pole = new HexNode(WEST_POLE);
+	this->west_pole->x=3*width;
+	this->west_pole->y=height;
+	*/
+	this->north_pole = new HexNode(NORTH_POLE);
+	this->south_pole = north_pole;
+	this->highlighted=0;
+	this->north_pole->x=0;
+	this->north_pole->y=0;
 	
-	north_pole = new HexNode(NORTH_POLE);
-	south_pole = north_pole;
-	highlighted=0;
-	north_pole->x=0;
-	north_pole->y=0;
+	HexNode * current_node = this->north_pole;
+	for(int i=1; i<width*4; i++)
+	{
+		current_node = current_node->addNeighbor(EAST);
+	}
+	current_node=current_node->addNeighbor(EAST,this->north_pole);
 	
-	
+	for(int j=1; j<height*2; j++)
+	{
+		if(j%2==0)
+		{
+			current_node = current_node->addNeighbor(SOUTH_EAST);
+			if(j==height*2-1)
+				current_node->addNeighbor(SOUTH_WEST, this->north_pole);
+		}
+		else
+		{
+			current_node = current_node->addNeighbor(SOUTH_WEST);
+			if(j==height*2-1)
+				current_node->addNeighbor(SOUTH_EAST, this->north_pole);
+			current_node->isGround = true;
+		}
+		
+		for(int i=1; i<width*4; i++)
+		{
+			if(j==height)
+			{
+				if(i==0)
+					this->prime=current_node;
+				if(i==width)
+					this->east_pole = current_node;
+				if(i==width*2)
+					this->anti_prime = current_node;
+				if(i==width*3)
+					this->west_pole = current_node;
+					
+			}
+			current_node = current_node->addNeighbor(EAST);
+		}
+	}
+	/*
 	{
 		HexNode * current_node[4];
 		current_node[0]= prime;
@@ -64,10 +105,10 @@ HexMap::HexMap(int width, int height):Map( width, height)
 				//current_node[j]->neighbor[EAST]->neighbor[WEST]=current_node[j];
 				//current_node[j]=current_node[j]->neighbor[EAST];
 				current_node[j]=current_node[j]->addNeighbor(EAST);
-				/*if(land->getAverageHeight(current_node[j]->x*a, current_node[j]->y*b, r)>=0.5)
+				//if(land->getAverageHeight(current_node[j]->x*a, current_node[j]->y*b, r)>=0.5)
 				{
-					current_node[j]->isGround=true;
-				}*/
+				//	current_node[j]->isGround=true;
+				}
 			}
 		}
 		//finialize edge
@@ -87,7 +128,7 @@ HexMap::HexMap(int width, int height):Map( width, height)
 		meridian[0]= prime;//heading north
 		meridian[1] = prime;//heading south
 		
-		for(int i=0; i<height*2+1; i++)
+		for(int i=0; i<height*2-1; i++)
 		{
 			if(i%2==0)
 			{
@@ -107,14 +148,14 @@ HexMap::HexMap(int width, int height):Map( width, height)
 				meridian[0]->isGround = true;
 				meridian[1] = meridian[1]->addNeighbor(SOUTH_WEST);
 			}
-			/*if(land->getAverageHeight(meridian[0]->x*a, meridian[0]->y*b, r)>=0.5)
+			//if(land->getAverageHeight(meridian[0]->x*a, meridian[0]->y*b, r)>=0.5)
 			{
-				meridian[0]->isGround=true;
+			//	meridian[0]->isGround=true;
 			}
-			if(land->getAverageHeight(meridian[1]->x*a, meridian[1]->y*b, r)>=0.5)
+			//if(land->getAverageHeight(meridian[1]->x*a, meridian[1]->y*b, r)>=0.5)
 			{
-				meridian[1]->isGround=true;
-			}*/
+			//	meridian[1]->isGround=true;
+			}
 			//fill in lattitude
 			HexNode * current_node[2];
 			current_node[0] = meridian[0]->addNeighbor(EAST);
@@ -130,19 +171,19 @@ HexMap::HexMap(int width, int height):Map( width, height)
 				current_node[0] = current_node[0]->addNeighbor(EAST);
 				current_node[1] = current_node[1]->addNeighbor(EAST);
 				
-			/*char str[128];
-			sprintf(str,"x=%i, y=%i",current_node[0]->x, current_node[0]->y);
-			netCon.sendMessage(str);
-				if(land->getAverageHeight(current_node[0]->x*this->a, current_node[0]->y*this->b, this->r)>=0.5)
+			//char str[128];
+			//sprintf(str,"x=%i, y=%i",current_node[0]->x, current_node[0]->y);
+			//netCon.sendMessage(str);
+			//	if(land->getAverageHeight(current_node[0]->x*this->a, current_node[0]->y*this->b, this->r)>=0.5)
 				{
-					current_node[0]->isGround=true;
+			//		current_node[0]->isGround=true;
 				}
-				if(land->getAverageHeight(current_node[1]->x*this->a, current_node[1]->y*this->b, this->r)>=0.5)
+			//	if(land->getAverageHeight(current_node[1]->x*this->a, current_node[1]->y*this->b, this->r)>=0.5)
 				{
-					current_node[1]->isGround=true;
+			//		current_node[1]->isGround=true;
 				}
 				
-			netCon.sendMessage("End");*/
+			//netCon.sendMessage("End");
 			}
 		}
 				netCon.sendMessage("north Pole");
@@ -161,7 +202,7 @@ HexMap::HexMap(int width, int height):Map( width, height)
 			}
 			current_node=current_node->addNeighbor(EAST);
 		}
-/**/}
+}*/
 
 	prime->isGround = true;
 	prime->neighbor[EAST]->isGround = true;
@@ -175,7 +216,7 @@ void
 HexMap::CheckMap()
 {
 
-	HexNode * up = prime;
+	HexNode * up = north_pole;//prime; //
 	int q=0;
 	do
 	{
@@ -196,8 +237,41 @@ HexMap::CheckMap()
 				sprintf(loc,"west");
 			else
 				sprintf(loc,"");
-			sprintf(str,"%i -- x=%i, y=%i, %s",(int)r,r->x,r->y,loc);
+			sprintf(str,"%i --%i-- x=%i, y=%i, %s",(int)r, r->ID,r->x,r->y,loc);
 			netCon.sendMessage(str);
+			bool exit=false;
+			if( r->neighbor[      EAST]==0)
+			{
+				netCon.sendMessage("EAST is null");
+				exit = true;
+			}
+			if(r->neighbor[SOUTH_EAST]==0)
+			{
+				netCon.sendMessage("SOUTH_EAST is null");
+				exit = true;
+			}
+			if(r->neighbor[SOUTH_WEST]==0)
+			{
+				netCon.sendMessage("SOUTH_WEST is null");
+				exit = true;
+			}
+			if(r->neighbor[      WEST]==0)
+			{
+				netCon.sendMessage("WEST is null");
+				exit = true;
+			}
+			if(r->neighbor[NORTH_WEST]==0)
+			{
+				netCon.sendMessage("North_west is null");
+				exit = true;
+			}
+			if(r->neighbor[NORTH_EAST]==0)
+			{
+				netCon.sendMessage("NORTH_EAST is null");
+				exit = true;
+			}
+			//if(q++>100 || exit)
+			//	return;
 			sprintf(str,"\t[ East(%i,%i), SOUTH_EAST(%i,%i), SOUTH_WEST(%i,%i), WEST(%i,%i), NORTH_WEST(%i,%i), NORTH_EAST(%i,%i)]",
 				r->neighbor[      EAST]->x,r->neighbor[      EAST]->y,
 				r->neighbor[SOUTH_EAST]->x,r->neighbor[SOUTH_EAST]->y,
@@ -206,21 +280,14 @@ HexMap::CheckMap()
 				r->neighbor[NORTH_WEST]->x,r->neighbor[NORTH_WEST]->y,
 				r->neighbor[NORTH_EAST]->x,r->neighbor[NORTH_EAST]->y);
 			netCon.sendMessage(str);
-			if( r->neighbor[      EAST]==0 ||
-				r->neighbor[SOUTH_EAST]==0 ||
-				r->neighbor[SOUTH_WEST]==0 ||
-				r->neighbor[      WEST]==0 ||
-				r->neighbor[NORTH_WEST]==0 ||
-				r->neighbor[NORTH_EAST]==0 ||
-				q++>100)
-			return;
+			
 			r=r->neighbor[EAST];
 		}while(r!=up);
-		if(up->neighbor[NORTH_EAST]->x==0)
-			up=up->neighbor[NORTH_EAST];
+		if(up->neighbor[SOUTH_EAST]->y%2==0)
+			up=up->neighbor[SOUTH_EAST];
 		else
-			up=up->neighbor[NORTH_WEST];
-	}while(up!=prime || up->y!=0);
+			up=up->neighbor[SOUTH_WEST];
+	}while(up!=north_pole || up->y!=0);
 }
 
 //Change so that nodes are unknown to outside world
@@ -228,10 +295,14 @@ void
 HexMap::SetStart(HexNode * s)
 {
 	start = s;
+	char str[128];
+	sprintf(str,"set Start %i, %i",(int)s->x,s->y);
+	netCon.sendMessage(str);
 }
 void
 HexMap::DrawMap()
 {
+	
 	(*land).Draw(start->x*a-a/2,start->y*(s+2*h)-(s+2*h)/2);
 	#define BLUE 0x0000FFAA
 	#define GREEN 0x00FF00AA
