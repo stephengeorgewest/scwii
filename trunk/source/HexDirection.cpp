@@ -3,8 +3,8 @@
 
 HexDirection& operator++(HexDirection& d, int) // postfix ++
 {
-	if (d == WEST)
-		return d = NORTH_WEST; //rollover
+	if ((int)d ==5)// WEST)
+		return d = static_cast<HexDirection> (0);//NORTH_WEST; //rollover
 	int temp = d; //convert to an int
 	return d = static_cast<HexDirection> (++temp);
 }

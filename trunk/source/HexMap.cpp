@@ -16,16 +16,25 @@ HexMap::~HexMap()
 {
 	delete this->land;
 }
-HexMap::HexMap(int width, int height):Map( width, height)
-{
+HexMap::HexMap(int _width, int _height):Map( _width, _height)
+{//minimum size 4x4
+	
+	this->height= 2*(abs(_height)+2);
+	this->width = 4*(abs(_width )+1);
 	this->s=10.0;
 	#define PI 3.14159265358979323846264338327950288419716939937510
 	this->h = sin( 2*PI*30/360 ) * this->s;
 	float r = cos( 2*PI*30/360 ) * this->s;
 	this->b = this->s + 2 * this->h;
 	this->a = 2 * r;
-	this->land = new Terrain((width*4)*((int)(this->a+0.5)), (height*4+2)*((int)(this->b+0.5)),0.7,true);
+	this->land = new Terrain(this->width*((int)(this->a+0.5)), this->height*((int)(this->b+0.5)),0.7,true);
 	// mercator projection
+	//try http://axiscity.hexamon.net/users/isomage/traveller/world/
+	this->Nodes = new HexNode**[this->height];
+	for(int i=0; i< this->height; i++)
+	{
+		this->Nodes[i]=new HexNode*[this->width];
+	}
 	/*
 	this->prime = new HexNode(PRIME);
 	this->prime->x=0;
@@ -40,170 +49,41 @@ HexMap::HexMap(int width, int height):Map( width, height)
 	this->west_pole->x=3*width;
 	this->west_pole->y=height;
 	*/
-	this->north_pole = new HexNode(NORTH_POLE);
-	this->south_pole = north_pole;
-	this->highlighted=0;
-	this->north_pole->x=0;
-	this->north_pole->y=0;
 	
-	HexNode * current_node = this->north_pole;
-	for(int i=1; i<width*4; i++)
-	{
-		current_node = current_node->addNeighbor(EAST);
-	}
-	current_node=current_node->addNeighbor(EAST,this->north_pole);
 	
-	for(int j=1; j<height*2; j++)
+	for(int i=0; i< this->height; i++)
 	{
-		if(j%2==0)
+		for(int j=0;j<this->width; j++)
 		{
-			current_node = current_node->addNeighbor(SOUTH_EAST);
-			if(j==height*2-1)
-				current_node->addNeighbor(SOUTH_WEST, this->north_pole);
-		}
-		else
-		{
-			current_node = current_node->addNeighbor(SOUTH_WEST);
-			if(j==height*2-1)
-				current_node->addNeighbor(SOUTH_EAST, this->north_pole);
-			current_node->isGround = true;
-		}
-		
-		for(int i=1; i<width*4; i++)
-		{
-			if(j==height)
+			if(j==0)
 			{
 				if(i==0)
-					this->prime=current_node;
-				if(i==width)
-					this->east_pole = current_node;
-				if(i==width*2)
-					this->anti_prime = current_node;
-				if(i==width*3)
-					this->west_pole = current_node;
-					
-			}
-			current_node = current_node->addNeighbor(EAST);
-		}
-	}
-	/*
-	{
-		HexNode * current_node[4];
-		current_node[0]= prime;
-		current_node[1] = east_pole;
-		current_node[2] = anti_prime;
-		current_node[3] = west_pole;
-		//build equator
-		for(int i=1; i<width; i++)
-		{
-			//    *     *     *
-			// *     *     *
-			// -> 1 <-> 2 <-> 3 <-
-			for(int j=0; j<4; j++)
-			{
-				//current_node[j]->neighbor[EAST] = new HexNode;
-				//current_node[j]->neighbor[EAST]->neighbor[WEST]=current_node[j];
-				//current_node[j]=current_node[j]->neighbor[EAST];
-				current_node[j]=current_node[j]->addNeighbor(EAST);
-				//if(land->getAverageHeight(current_node[j]->x*a, current_node[j]->y*b, r)>=0.5)
 				{
-				//	current_node[j]->isGround=true;
+					this->north_pole = new HexNode(NORTH_POLE);
+					this->south_pole = north_pole;
+					this->highlighted=0;
+					this->north_pole->x=0;
+					this->north_pole->y=0;
+					this->Nodes[0][0]=this->north_pole;
 				}
-			}
-		}
-		//finialize edge
-			//width=1 [3] == west pole
-		prime->addNeighbor(WEST,current_node[3]);
-			//width=1 [0] == prime
-		east_pole->addNeighbor(WEST,current_node[0]);
-			//width=1 [1] == EAST pole
-		anti_prime->addNeighbor(WEST,current_node[1]);
-			//width=1 [2] == anti_prime
-		west_pole->addNeighbor(WEST,current_node[2]);
-	}
-	{
-		// build prime meridian date line
-		// HexMap wrap removes south pole possibility
-		HexNode * meridian[2];
-		meridian[0]= prime;//heading north
-		meridian[1] = prime;//heading south
-		
-		for(int i=0; i<height*2-1; i++)
-		{
-			if(i%2==0)
-			{
-				//char str[128];
-				//sprintf(str,"East %i",i);
-				//netCon.sendMessage(str);
-				meridian[0] = meridian[0]->addNeighbor(NORTH_EAST);
-				meridian[1] = meridian[1]->addNeighbor(SOUTH_EAST);
-				
+				else
+				{
+					if(i%2==1)
+						Nodes[j][i]=Nodes[j][i-1]->addNeighbor(SOUTH_EAST);
+					else
+						Nodes[j][i]=Nodes[j][i-1]->addNeighbor(SOUTH_WEST);
+					
+				}
 			}
 			else
 			{
-				//char str[128];
-				//sprintf(str,"West %i",i);
-				//netCon.sendMessage(str);
-				meridian[0] = meridian[0]->addNeighbor(NORTH_WEST);
-				meridian[0]->isGround = true;
-				meridian[1] = meridian[1]->addNeighbor(SOUTH_WEST);
-			}
-			//if(land->getAverageHeight(meridian[0]->x*a, meridian[0]->y*b, r)>=0.5)
-			{
-			//	meridian[0]->isGround=true;
-			}
-			//if(land->getAverageHeight(meridian[1]->x*a, meridian[1]->y*b, r)>=0.5)
-			{
-			//	meridian[1]->isGround=true;
-			}
-			//fill in lattitude
-			HexNode * current_node[2];
-			current_node[0] = meridian[0]->addNeighbor(EAST);
-			current_node[1] = meridian[1]->addNeighbor(EAST);
-			int j=1;
-			while(current_node[0]->neighbor[EAST]!=meridian[0])
-			{
-				if(j++>100)
-				{
-					netCon.sendMessage("meridian loop too much");
-					break;
-				}
-				current_node[0] = current_node[0]->addNeighbor(EAST);
-				current_node[1] = current_node[1]->addNeighbor(EAST);
-				
-			//char str[128];
-			//sprintf(str,"x=%i, y=%i",current_node[0]->x, current_node[0]->y);
-			//netCon.sendMessage(str);
-			//	if(land->getAverageHeight(current_node[0]->x*this->a, current_node[0]->y*this->b, this->r)>=0.5)
-				{
-			//		current_node[0]->isGround=true;
-				}
-			//	if(land->getAverageHeight(current_node[1]->x*this->a, current_node[1]->y*this->b, this->r)>=0.5)
-				{
-			//		current_node[1]->isGround=true;
-				}
-				
-			//netCon.sendMessage("End");
+				Nodes[j][i]=Nodes[j-1][i]->addNeighbor(EAST);
 			}
 		}
-				netCon.sendMessage("north Pole");
-		//attach to pole
-		meridian[0]->addNeighbor(NORTH_WEST,north_pole);
-		meridian[1]->addNeighbor(SOUTH_WEST,north_pole);
-		
-		HexNode * current_node=north_pole->addNeighbor(EAST);
-		int j=1;//debug
-		while(current_node->neighbor[EAST]!=north_pole)
-		{
-			if(j++>100)
-			{
-				netCon.sendMessage("north pole loop too much");
-				break;
-			}
-			current_node=current_node->addNeighbor(EAST);
-		}
-}*/
-
+		if(Nodes[width-1][i]->neighbor[EAST]==0)
+			Nodes[width-1][i]->addNeighbor(EAST, Nodes[0][i]);
+	}
+	
 	prime->isGround = true;
 	prime->neighbor[EAST]->isGround = true;
 	prime->neighbor[NORTH_EAST]->isGround=true;
