@@ -27,6 +27,7 @@ class HexMap:public Map
 	//private:
 		int width;
 		int height;
+		HexNode *** Nodes;
 		HexNode * prime;
 		HexNode * anti_prime;
 		HexNode * north_pole;

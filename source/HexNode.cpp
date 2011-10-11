@@ -59,6 +59,12 @@ HexNode *
 HexNode::addNeighbor(HexDirection dir)
 {	
 	HexNode * n = new HexNode;
+
+	return this->addNeighbor(dir,n);
+}
+HexNode *
+HexNode::addNeighbor(HexDirection dir, HexNode * n)
+{
 	switch(dir)
 	{
 		case EAST:
@@ -120,11 +126,6 @@ HexNode::addNeighbor(HexDirection dir)
 		default:
 			break;
 	}
-	return this->addNeighbor(dir,n);
-}
-HexNode *
-HexNode::addNeighbor(HexDirection dir, HexNode * n)
-{
 	this->connectNodes(dir,n);
 	// check clockwise 3
 	//if(n->ID==9)
