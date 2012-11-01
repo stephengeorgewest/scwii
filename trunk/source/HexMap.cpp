@@ -30,11 +30,23 @@ HexMap::HexMap(int _width, int _height):Map( _width, _height)
 	this->land = new Terrain(this->width*((int)(this->a+0.5)), this->height*((int)(this->b+0.5)),0.7,true);
 	// mercator projection
 	//try http://axiscity.hexamon.net/users/isomage/traveller/world/
-	this->Nodes = new HexNode**[this->height];
-	for(int i=0; i< this->height; i++)
+	
 	{
-		this->Nodes[i]=new HexNode*[this->width];
+	char str[256];
+	sprintf(str, "width=%i, height=%d\ns=%f, h=%f, r=%f, a=%f,b=%f",
+		this->width,this->height,
+		this->s,this->h,r,this->a,this->b);
+		netCon.sendMessage(str);
 	}
+	
+	netCon.sendMessage("Land Initialized");
+	this->Nodes = new HexNode**[this->height];
+	netCon.sendMessage("Nodes** [] initialized");
+	for(int i=0; i< this->width; i++)
+	{
+		this->Nodes[i]=new HexNode*[this->height];
+	}
+	netCon.sendMessage("nodes*[][] initialized");
 	/*
 	this->prime = new HexNode(PRIME);
 	this->prime->x=0;
@@ -55,6 +67,9 @@ HexMap::HexMap(int _width, int _height):Map( _width, _height)
 	{
 		for(int j=0;j<this->width; j++)
 		{
+			char str[256];
+			sprintf(str,"\r\n%i, %i ",j,i);
+			netCon.sendMessage(str);
 			if(j==0)
 			{
 				if(i==0)
@@ -71,24 +86,51 @@ HexMap::HexMap(int _width, int _height):Map( _width, _height)
 					if(i%2==1)
 						Nodes[j][i]=Nodes[j][i-1]->addNeighbor(SOUTH_EAST);
 					else
+					{
 						Nodes[j][i]=Nodes[j][i-1]->addNeighbor(SOUTH_WEST);
-					
+						if(i==height/2)
+							this->prime=Nodes[j][i];
+					}
 				}
 			}
 			else
 			{
 				Nodes[j][i]=Nodes[j-1][i]->addNeighbor(EAST);
+				if(i==height/2 && (j/4)*4==j)
+					switch(j/4)
+					{
+						case 1:
+							this->east_pole=Nodes[j][i];
+							Nodes[j][i]->location=EAST_POLE;
+							break;
+						case 2:
+							this->anti_prime=Nodes[j][i];
+							Nodes[j][i]->location=ANTI_PRIME;
+							break;
+						case 3:
+							this->west_pole=Nodes[j][i];
+							Nodes[j][i]->location=EAST_POLE;
+							break;
+						default:
+							break;
+					}
 			}
 		}
+		
 		if(Nodes[width-1][i]->neighbor[EAST]==0)
+		{
+			netCon.sendMessage("connecting east-west");
 			Nodes[width-1][i]->addNeighbor(EAST, Nodes[0][i]);
+		}
+		//Nodes[j][i]->x=j;
+		//Nodes[j][i]->y=i;
 	}
-	
-	prime->isGround = true;
-	prime->neighbor[EAST]->isGround = true;
-	prime->neighbor[NORTH_EAST]->isGround=true;
-	prime->city = new City;
-	prime->city->location=prime;
+	netCon.sendMessage("each Nodes*[][] initialized");
+	this->prime->isGround = true;
+	this->prime->neighbor[EAST]->isGround = true;
+	this->prime->neighbor[NORTH_EAST]->isGround=true;
+	this->prime->city = new City;
+	this->prime->city->location=prime;
 	CheckMap();
 }
 
@@ -169,7 +211,7 @@ HexMap::CheckMap()
 			up=up->neighbor[SOUTH_WEST];
 	}while(up!=north_pole || up->y!=0);
 }
-
+/*
 //Change so that nodes are unknown to outside world
 void
 HexMap::SetStart(HexNode * s)
@@ -255,4 +297,4 @@ void
 HexMap::highlightNode(int x, int y)
 {
 	
-}
+}*/

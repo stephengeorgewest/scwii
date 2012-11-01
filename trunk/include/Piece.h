@@ -57,6 +57,7 @@ class Transport:public Piece{
 public:
 	Transport(City*);
 	static const int max_tanks = 8;
+	Tank tanks_list[8];
 };
 
 class Destroyer:public Piece{
@@ -72,7 +73,8 @@ public:
 class Carrier:public Piece{
 public:
 	Carrier(City* );
-
+	static const int max_fighters[8];
+	Fighter fighter_list[8];
 };
 
 class Battleship:public Piece{

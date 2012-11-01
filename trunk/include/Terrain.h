@@ -23,7 +23,7 @@ class Terrain
 		void RenderTerrain();
 		float getAverageHeight(int x , int y, int r);
 		~Terrain();
-		void Draw(int start_x, int start_y);
+		/*void Draw(int start_x, int start_y);*/
 };
 
 #endif

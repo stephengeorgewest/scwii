@@ -18,8 +18,8 @@ class Map
 		//change to use moveMap(int x, int y) or such
 		//to keep nodes internal
 		//void SetStart();
-		void DrawMap();
-		void moveMap(int x, int y);
+		/*void DrawMap();
+		void moveMap(int x, int y);*/
 	//private:
 		int width;
 		int height;

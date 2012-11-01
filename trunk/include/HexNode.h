@@ -7,6 +7,7 @@ class City;
 
 class HexNode
 {
+	friend ostream& operator<<(ostream& output, const HexNode* n);
 	public:
 		HexNode();
 		HexNode(GeographicLocation );

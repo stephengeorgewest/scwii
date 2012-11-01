@@ -59,12 +59,7 @@ HexNode *
 HexNode::addNeighbor(HexDirection dir)
 {	
 	HexNode * n = new HexNode;
-
-	return this->addNeighbor(dir,n);
-}
-HexNode *
-HexNode::addNeighbor(HexDirection dir, HexNode * n)
-{
+	//create coordinate of new node.
 	switch(dir)
 	{
 		case EAST:
@@ -126,17 +121,28 @@ HexNode::addNeighbor(HexDirection dir, HexNode * n)
 		default:
 			break;
 	}
+	return this->addNeighbor(dir,n);
+}
+HexNode *
+HexNode::addNeighbor(HexDirection dir, HexNode * n)
+{
+	
+	{
+		char buf[64];
+		sprintf(buf, "Add Neighbor(dir %i, ~)This %i(%i,%i), add %i(%i,%i)",dir,
+		this->ID,this->x,this->y, n->ID,n->x,n->y);
+		netCon.sendMessage(buf);
+	}
 	this->connectNodes(dir,n);
 	// check clockwise 3
 	//if(n->ID==9)
-	//{
-	//	char buf[64];
-	//	sprintf(buf, "\nThis %i, add %i, dir %i", this->ID,n->ID,dir);
-	//	netCon.sendMessage(buf);
-	//}
+	
+	//add neighbors of established this to new n
+	// clockwise 3
 	HexNode * neig = this->neighbor[dir+1];
 	if(neig)//may be null
 	{
+		netCon.sendMessage("have valid neighbor dir+1");
 		n->connectNodes((~dir)-1,neig);
 		
 		neig = neig->neighbor[dir];
@@ -155,6 +161,7 @@ HexNode::addNeighbor(HexDirection dir, HexNode * n)
 	neig = this->neighbor[dir-1];
 	if(neig)
 	{
+		netCon.sendMessage("have valid neighbor dir-1");
 		//neig may be null ... is fine
 		//neig->neig... may be null ... is not fine
 		
@@ -172,12 +179,21 @@ HexNode::addNeighbor(HexDirection dir, HexNode * n)
 			}
 		}
 	}
+	netCon.sendMessage("Neighbors connected");
 	return n;
 }
 
 void
 HexNode::connectNodes(HexDirection dir, HexNode* n2)
 {	
+	{
+		char str[256];
+		sprintf(str, "%i(%i,%i) connect nodes (dir=%i,id=%i(%i,%i)) ",
+			this->ID, this->x,this->y,dir,  n2->ID, n2->x,n2->y);
+		netCon.sendMessage(str);
+		if((this->ID==13&&n2->ID==24)||(this->ID==24&&n2->ID==13))
+			netCon.sendMessage("connecting 13+24");
+	}
 	this->neighbor[dir]=n2;
 	n2->neighbor[~dir]=this;
 }
@@ -199,3 +215,25 @@ HexNode::connectNodesPortal(HexNode* n1, HexDirection dir1, HexNode* n2, HexDire
 	n2->neighbor[dir2]=n1;
 	
 }*/
+
+ostream& operator<<(ostream& output, const HexNode* n) {
+    output << "\t\t" << n->neighbor[NORTH_WEST]->ID << " ^ " << n->neighbor[NORTH_EAST]->ID <<"\n" <<
+		n->neighbor[WEST]->ID << " | " << n->id"(" <<  n->x << ", " << n->y <<") | " << n->neighbor[EAST]->ID <<
+			"\t\t" << n->neighbor[SOUTH_WEST]->ID << " v " << n->neighbor[SOUTH_EAST]->ID;
+    return output;  // for multiple << operators.
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

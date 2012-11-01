@@ -314,6 +314,7 @@ Terrain::RenderTerrain()
 	//renderer.SetLightColor();
 	renderer.Render ();
 }
+/*
 void
 Terrain::Draw(int start_x, int start_y)
 {
@@ -349,20 +350,20 @@ Terrain::Draw(int start_x, int start_y)
 #ifndef OSX
 			utils::Color c = image.GetValue(x_,y_);
 			GRRLIB_Plot(x, y, c.red<<24 | c.green<<16 | c.blue<<8 | c.alpha);
-			/*float num = this->map[y_][x_];
-			if(num == NAN)
-			{
-				GRRLIB_Plot(x,y,0xff0000FF);
-			}
-			else
-			{
-				int val = (num)*255.0;
-				GRRLIB_Plot(x,y,val<<24|val<<16|val<<8|0xff);
-			}*/
+			//float num = this->map[y_][x_];
+			//if(num == NAN)
+			//{
+			//	GRRLIB_Plot(x,y,0xff0000FF);
+			//}
+			//else
+			//{
+			//	int val = (num)*255.0;
+			//	GRRLIB_Plot(x,y,val<<24|val<<16|val<<8|0xff);
+			//}
 #endif
 		}
 	}
-}
+}*/
 //
 
 float Terrain::getAverageHeight(int x_ , int y_, int r_)

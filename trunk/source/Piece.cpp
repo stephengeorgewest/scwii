@@ -17,9 +17,11 @@ void Piece::attack(Piece p)
 	//risk style?
 	//at most both pieces can loose one strength/attack
 	//int divisions;
-	if(false);//I'm stronger
-	if(false);//he's stronger
-	if(false);//we're the same //this.type.strongAgainst.type.id==p.type.id)
+	//if(false);//I'm stronger
+	//if(false);//he's stronger
+	//if(false);//we're the same //this.type.strongAgainst.type.id==p.type.id)
+
+	// do every thing under specific piece
 }
 
 void Piece::move(HexDirection d)
@@ -31,7 +33,9 @@ void Piece::move(HexDirection d)
 	}
 }
 
-
+/*
+ ground units
+*/
 
 
 Tank::Tank(City* c):Piece(GROUND, TANK, c, 2, 2, 4)
@@ -40,9 +44,21 @@ Tank::Tank(City* c):Piece(GROUND, TANK, c, 2, 2, 4)
 }
 void Tank::attack(City* c)
 {
-	
+	//if(c->pieces)
+	// attack first thing in city list
+	//else
+	// attack city some chance of capture
 }
+void Tank::attack(Fighter* f)
+{
+	//attack
+	//counter attack in different?
+}
+//?? do this for each??
 
+/*
+ air units
+ */
 
 Fighter::Fighter(City* c):Piece(AIR, FIGHTER, c, 1, 20, 6),fuel_max(20)
 {
@@ -71,12 +87,20 @@ void Bomber::bomb(HexNode * n, int r)
 	
 }
 
-
+/*
+	Water units
+*/
 Transport::Transport(City*c):Piece(WATER, TRANSPORT, c, 3, 3, 8)
 {
 	
 }
 
+void Transport::move(HexDirection d)
+{
+	this->Piece::move(d)
+	for(int i=0; i<this.max_tanks; i++)
+		this.tanks_list[i]->move(d);
+}
 
 Destroyer::Destroyer(City* c):Piece(WATER, DESTROYER, c, 3, 4, 8)
 {
@@ -95,7 +119,12 @@ Carrier::Carrier(City* c):Piece(WATER, CARRIER, c, 12, 3, 14)
 	
 }
 
-
+void Carrier::move(HexDirection d)
+{
+	this->Piece::move(d)
+	for(int i=0; i<this.max_fighters; i++)
+		this.fighters_list[i]->move(d);
+}
 Battleship::Battleship(City* c):Piece(WATER, BATTLESHIP, c, 18, 3, 20)
 {
 	

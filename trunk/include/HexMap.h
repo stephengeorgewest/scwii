@@ -20,10 +20,10 @@ class HexMap:public Map
 		~HexMap();
 		//change to use moveMap(int x, int y) or such
 		//to keep nodes internal
-		void SetStart(HexNode * start);
+		/*void SetStart(HexNode * start);
 		void DrawMap();
 		void highlightNode(int x, int y);
-		void moveMap(int x, int y);
+		void moveMap(int x, int y);*/
 	//private:
 		int width;
 		int height;
